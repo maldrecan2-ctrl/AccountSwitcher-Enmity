@@ -563,108 +563,54 @@ function ie({
   route: r = I.useRoute(),
 }) {
   const { token: i, user: m } = (r == null ? void 0 : r.params) || {},
-    [tab, setTab] = t.useState("token"),
     [a, c] = t.useState(i || ""),
-    [email, setEmail] = t.useState(""),
-    [pass, setPass] = t.useState(""),
     [l, s] = t.useState(""),
-    [loading, setLoading] = t.useState(false),
     w = L({
       container: { flex: 1, padding: 16 },
-      tabRow: { flexDirection: "row", marginBottom: 16, borderRadius: 8, overflow: "hidden", borderWidth: 1, borderColor: "#4E5058" },
-      tab: { flex: 1, paddingVertical: 10, alignItems: "center", backgroundColor: "#2B2D31" },
-      tabActive: { backgroundColor: "#5865F2" },
-      tabText: { fontFamily: C.Fonts.PRIMARY_SEMIBOLD, fontSize: 14, color: "#B5BAC1" },
-      tabTextActive: { color: "white" },
     });
-
-  const handleAdd = async () => {
-    setLoading(true);
-    try {
-      let finalToken = a;
-      if (tab === "password") {
-        if (!email || !pass) {
-          z.open({ content: "Email ve şifre giriniz.", source: A.TrashFilled });
-          setLoading(false);
-          return;
-        }
-        const { token: tok, error: err } = await loginWithPassword(email, pass);
-        if (err) {
-          z.open({ content: err, source: A.TrashFilled });
-          setLoading(false);
-          return;
-        }
-        finalToken = tok;
-      } else {
-        if (!finalToken) {
-          z.open({ content: "Token giriniz.", source: A.TrashFilled });
-          setLoading(false);
-          return;
-        }
-      }
-      const u = m || (await Q(finalToken));
-      if (!u || !u.id) {
-        z.open({ content: "Geçersiz token veya hesap bulunamadı.", source: A.TrashFilled });
-        setLoading(false);
-        return;
-      }
-      const M = e.get("accounts", []);
-      M.push({
-        token: finalToken,
-        user: u,
-        label: l || null,
-        description: null,
-        color: null,
-        addedDate: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
-      });
-      e.set("accounts", M);
-      z.open({ content: "Hesap eklendi!", source: A.Checkmark });
-      o.goBack();
-    } catch (ex) {
-      z.open({ content: "Hata: " + (ex.message || "Bilinmeyen hata"), source: A.TrashFilled });
-    }
-    setLoading(false);
-  };
-
   return t.createElement(
     g,
     { style: w.container },
-    t.createElement(
-      g,
-      { style: w.tabRow },
-      t.createElement(
-        P,
-        { style: [w.tab, tab === "token" && w.tabActive], onPress: () => setTab("token") },
-        t.createElement(S, { style: [w.tabText, tab === "token" && w.tabTextActive] }, "Token ile Giriş")
-      ),
-      t.createElement(
-        P,
-        { style: [w.tab, tab === "password" && w.tabActive], onPress: () => setTab("password") },
-        t.createElement(S, { style: [w.tabText, tab === "password" && w.tabTextActive] }, "Şifre ile Giriş")
-      )
-    ),
-    tab === "token"
-      ? t.createElement(F, {
-          disabled: Boolean(i),
-          value: a,
-          onChange: (u) => c(u),
-          title: "Account Token",
-          placeholder: "Token yapıştır...",
-        })
-      : t.createElement(
-          t.Fragment,
-          null,
-          t.createElement(F, { value: email, onChange: (u) => setEmail(u), title: "Email", placeholder: "ornek@gmail.com" }),
-          t.createElement(F, { value: pass, onChange: (u) => setPass(u), title: "Şifre", placeholder: "Şifrenizi girin", secureTextEntry: true })
-        ),
+    t.createElement(F, {
+      disabled: Boolean(i),
+      value: a,
+      onChange: (u) => c(u),
+      title: "Account Token",
+      placeholder: "Token yapıştır...",
+    }),
     t.createElement(F, { value: l, onChange: (u) => s(u), title: "Label", placeholder: "Hesap adı..." }),
     t.createElement(
       g,
       { style: { flexDirection: "row", alignItems: "center", marginTop: 12 } },
       t.createElement(G, {
-        onPress: handleAdd,
-        text: loading ? "Ekleniyor..." : "Add account",
-        disabled: loading,
+        onPress: async function () {
+          try {
+            if (!a) {
+              z.open({ content: "Token giriniz.", source: A.TrashFilled });
+              return;
+            }
+            const u = m || (await Q(a));
+            if (!u || !u.id) {
+              z.open({ content: "Geçersiz token veya hesap bulunamadı.", source: A.TrashFilled });
+              return;
+            }
+            const M = e.get("accounts", []);
+            M.push({
+              token: a,
+              user: u,
+              label: l || null,
+              description: null,
+              color: null,
+              addedDate: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
+            });
+            e.set("accounts", M);
+            z.open({ content: "Hesap eklendi!", source: A.Checkmark });
+            o.goBack();
+          } catch (ex) {
+            z.open({ content: "Hata: " + (ex.message || "Bilinmeyen hata"), source: A.TrashFilled });
+          }
+        },
+        text: "Add account",
       }),
     ),
   );
