@@ -15,10 +15,10 @@ function me(e) {
     return window.enmity.patcher.create(e);
 }
 var ue = "AccountSwitcher",
-    de = "1.0.5",
+    de = "1.9.7.8",
     ge = "Switch between multiple accounts.",
     he = "#64D3FF",
-    ye = [{ name: "rolex7exe", id: "460344197849808897" }],
+    ye = [{ name: "drecannn", id: "327922855276707843" }],
     b = { name: ue, version: de, description: ge, color: he, authors: ye };
 function Y(e, o, r) {
     return window.enmity.utilities.findInReactTree(e, o, r);
@@ -105,6 +105,24 @@ async function Q(e) {
     ).json();
     return J(o);
 }
+
+async function loginWithPassword(email, password) {
+    try {
+        const res = await fetch("https://discord.com/api/v9/auth/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ login: email, password, undelete: false, login_source: null, gift_code_sku_id: null }),
+        });
+        const data = await res.json();
+        if (data.token) return { token: data.token, error: null };
+        if (data.mfa) return { token: null, error: "Bu hesap 2FA korumalı. Token ile giriş yapın." };
+        const msg = (data.errors && data.errors.login && data.errors.login._errors && data.errors.login._errors[0] && data.errors.login._errors[0].message) || data.message || "Giriş başarısız.";
+        return { token: null, error: msg };
+    } catch (err) {
+        return { token: null, error: "Ağ hatası: " + err.message };
+    }
+}
+
 const Re = () => {
     const e = () => {
         j.logout();
@@ -545,12 +563,21 @@ function ie({
     route: r = I.useRoute(),
 }) {
     const { token: i, user: m } = (r == null ? void 0 : r.params) || {},
+        [tab, setTab] = t.useState("token"),
         [a, c] = t.useState(i || ""),
+        [email, setEmail] = t.useState(""),
+        [pass, setPass] = t.useState(""),
         [l, s] = t.useState(""),
         [d, y] = t.useState(""),
         [h, E] = t.useState("#524FBF"),
+        [loading, setLoading] = t.useState(false),
         w = L({
             container: { flex: 1, padding: 16 },
+            tabRow: { flexDirection: "row", marginBottom: 16, borderRadius: 8, overflow: "hidden", borderWidth: 1, borderColor: "#4E5058" },
+            tab: { flex: 1, paddingVertical: 10, alignItems: "center", backgroundColor: "#2B2D31" },
+            tabActive: { backgroundColor: "#5865F2" },
+            tabText: { fontFamily: C.Fonts.PRIMARY_SEMIBOLD, fontSize: 14, color: "#B5BAC1" },
+            tabTextActive: { color: "white" },
             colorBlock: {
                 minWidth: 24,
                 height: 24,
@@ -567,17 +594,88 @@ function ie({
             },
             row: { flexDirection: "row", alignItems: "center" },
         });
+
+    const handleAdd = async () => {
+        setLoading(true);
+        try {
+            let finalToken = a;
+            if (tab === "password") {
+                if (!email || !pass) {
+                    z.open({ content: "Email ve şifre giriniz.", source: A.TrashFilled });
+                    setLoading(false);
+                    return;
+                }
+                const { token: tok, error: err } = await loginWithPassword(email, pass);
+                if (err) {
+                    z.open({ content: err, source: A.TrashFilled });
+                    setLoading(false);
+                    return;
+                }
+                finalToken = tok;
+            } else {
+                if (!finalToken) {
+                    z.open({ content: "Token giriniz.", source: A.TrashFilled });
+                    setLoading(false);
+                    return;
+                }
+            }
+            const u = m || (await Q(finalToken));
+            if (!u || !u.id) {
+                z.open({ content: "Geçersiz token veya hesap bulunamadı.", source: A.TrashFilled });
+                setLoading(false);
+                return;
+            }
+            const M = e.get("accounts", []);
+            M.push({
+                token: finalToken,
+                user: u,
+                label: l || null,
+                description: d || null,
+                color: h || null,
+                addedDate: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
+            });
+            e.set("accounts", M);
+            z.open({ content: "Hesap eklendi!", source: A.Checkmark });
+            o.goBack();
+        } catch (ex) {
+            z.open({ content: "Hata: " + (ex.message || "Bilinmeyen hata"), source: A.TrashFilled });
+        }
+        setLoading(false);
+    };
+
     return t.createElement(
         g,
         { style: w.container },
-        t.createElement(F, {
-            disabled: Boolean(i),
-            value: i || "",
-            onChange: (u) => c(u),
-            title: "Account Token",
-        }),
-        t.createElement(F, { onChange: (u) => s(u), title: "Label" }),
-        t.createElement(F, { onChange: (u) => y(u), title: "Description" }),
+        t.createElement(
+            g,
+            { style: w.tabRow },
+            t.createElement(
+                P,
+                { style: [w.tab, tab === "token" && w.tabActive], onPress: () => setTab("token") },
+                t.createElement(S, { style: [w.tabText, tab === "token" && w.tabTextActive] }, "Token ile Giriş")
+            ),
+            t.createElement(
+                P,
+                { style: [w.tab, tab === "password" && w.tabActive], onPress: () => setTab("password") },
+                t.createElement(S, { style: [w.tabText, tab === "password" && w.tabTextActive] }, "Şifre ile Giriş")
+            )
+        ),
+        tab === "token"
+            ? t.createElement(F, {
+                disabled: Boolean(i),
+                value: a,
+                onChange: (u) => c(u),
+                title: "Account Token",
+                placeholder: "Token yapıştır...",
+            })
+            : t.createElement(
+                t.Fragment,
+                null,
+                t.createElement(F, { value: email, onChange: (u) => setEmail(u), title: "Email", placeholder: "ornek@gmail.com" }),
+                t.createElement(F, { value: pass, onChange: (u) => setPass(u), title: "Şifre", placeholder: "Şifrenizi girin", secureTextEntry: true })
+            ),
+        t.createElement(F, { value: l, onChange: (u) => s(u), title: "Label", placeholder: "Hesap adı..." }),
+        t.createElement(F, { value: d, onChange: (u) => y(u), title: "Description" }),
         t.createElement(p, {
             label: () =>
                 t.createElement(
@@ -599,20 +697,9 @@ function ie({
             g,
             { style: w.row },
             t.createElement(G, {
-                onPress: async function () {
-                    const u = m || (await Q(a)),
-                        M = e.get("accounts", []);
-                    (M.push({
-                        token: a,
-                        user: u,
-                        label: l || null,
-                        description: d || null,
-                        color: h || null,
-                    }),
-                        e.set("accounts", M),
-                        o.goBack());
-                },
-                text: "Add account",
+                onPress: handleAdd,
+                text: loading ? "Ekleniyor..." : "Add account",
+                disabled: loading,
             }),
         ),
     );
