@@ -867,28 +867,6 @@ const ae = U("Welcome", { default: !1 }),
       try { Be(B); } catch (err) { console.error("[AccountSwitcher] Be patch failed:", err); }
 
       try {
-        B.before(
-          window.enmity.modules.common.Messages,
-          "sendMessage",
-          function (ctx, args) {
-            try {
-              if (
-                typeof args[1]?.content === "string" &&
-                args[1].content.startsWith("/login ")
-              ) {
-                const token = args[1].content.substring(7).trim();
-                if (token) {
-                  j.loginToken(token);
-                  z.open({ content: "Logging in...", source: A.Checkmark });
-                  args[1].content = "*Giriş yapılıyor...*";
-                }
-              }
-            } catch (_) {}
-          },
-        );
-      } catch (err) { console.error("[AccountSwitcher] sendMessage patch failed:", err); }
-
-      try {
         const e = t.createElement(G, {
           onPress: () => R.push(W, { name: b.name }),
           style: { marginBottom: 0, backgroundColor: "#64d3ff" },
