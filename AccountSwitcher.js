@@ -464,27 +464,11 @@ var Me = ({ settings: e, navigation: o }) => {
           {
             style: l.addBtn,
             onPress: () => {
-              Boolean(_.getToken()) && j.loginToken("");
-              R.popAll();
-              z.open({
-                content: 'After logging in, use "Add Current Account" to add your account.',
-                source: A.Highlight,
-              });
+              o.navigate("AccountSwitcherAddAccount");
             },
           },
-          t.createElement(S, { style: l.addBtnText }, "+ Add Account (User/Pass)")
+          t.createElement(S, { style: l.addBtnText }, "+ Add Account")
         ),
-        Boolean(_.getToken()) &&
-          t.createElement(p, {
-            label: "Add Current Account",
-            leading: t.createElement(p.Icon, { source: A.MyAccount }),
-            onPress: () => {
-              o.navigate("AccountSwitcherAddAccount", {
-                token: _.getToken(),
-                user: J(pe.getCurrentUser()),
-              });
-            },
-          }),
         Boolean(_.getToken()) &&
           t.createElement(Te, {
             color: "danger",
@@ -585,56 +569,146 @@ function ie({
   route: r = I.useRoute(),
 }) {
   const { token: i, user: m } = (r == null ? void 0 : r.params) || {},
-    [a, c] = t.useState(i || ""),
-    [l, s] = t.useState(""),
+    [email, setEmail] = t.useState(""),
+    [password, setPassword] = t.useState(""),
+    [token, setToken] = t.useState(i || ""),
+    [label, setLabel] = t.useState(""),
     w = L({
       container: { flex: 1, padding: 16 },
+      button: {
+        marginBottom: 12,
+      },
     });
+  
+  const addAccountWithToken = async () => {
+    try {
+      if (!token) {
+        z.open({ content: "Token giriniz.", source: A.TrashFilled });
+        return;
+      }
+      const u = m || (await Q(token));
+      if (!u || !u.id) {
+        z.open({ content: "Geçersiz token veya hesap bulunamadı.", source: A.TrashFilled });
+        return;
+      }
+      const M = e.get("accounts", []);
+      M.push({
+        token: token,
+        user: u,
+        label: label || null,
+        description: null,
+        color: null,
+        addedDate: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
+      });
+      e.set("accounts", M);
+      z.open({ content: "Hesap eklendi!", source: A.Checkmark });
+      o.goBack();
+    } catch (ex) {
+      z.open({ content: "Hata: " + (ex.message || "Bilinmeyen hata"), source: A.TrashFilled });
+    }
+  };
+
+  const addAccountWithEmailPassword = async () => {
+    try {
+      if (!email || !password) {
+        z.open({ content: "Email ve şifre giriniz.", source: A.TrashFilled });
+        return;
+      }
+      const result = await loginWithPassword(email, password);
+      if (result.error) {
+        z.open({ content: result.error, source: A.TrashFilled });
+        return;
+      }
+      const user = await Q(result.token);
+      if (!user || !user.id) {
+        z.open({ content: "Geçersiz token veya hesap bulunamadı.", source: A.TrashFilled });
+        return;
+      }
+      const M = e.get("accounts", []);
+      M.push({
+        token: result.token,
+        user: user,
+        label: label || null,
+        description: null,
+        color: null,
+        addedDate: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
+      });
+      e.set("accounts", M);
+      z.open({ content: "Hesap eklendi!", source: A.Checkmark });
+      o.goBack();
+    } catch (ex) {
+      z.open({ content: "Hata: " + (ex.message || "Bilinmeyen hata"), source: A.TrashFilled });
+    }
+  };
+
+  const addCurrentAccount = async () => {
+    try {
+      if (!_.getToken()) {
+        z.open({ content: "Önce hesaba giriş yapın.", source: A.TrashFilled });
+        return;
+      }
+      const user = J(pe.getCurrentUser());
+      const M = e.get("accounts", []);
+      M.push({
+        token: _.getToken(),
+        user: user,
+        label: label || null,
+        description: null,
+        color: null,
+        addedDate: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
+      });
+      e.set("accounts", M);
+      z.open({ content: "Hesap eklendi!", source: A.Checkmark });
+      o.goBack();
+    } catch (ex) {
+      z.open({ content: "Hata: " + (ex.message || "Bilinmeyen hata"), source: A.TrashFilled });
+    }
+  };
+
   return t.createElement(
     g,
     { style: w.container },
+    t.createElement(S, { style: { marginBottom: 20, color: x.HEADER_PRIMARY, fontSize: 16, textAlign: "center" } }, "Enter your Discord account credentials or add your current account"),
+    t.createElement(F, {
+      value: email,
+      onChange: setEmail,
+      title: "Email address",
+      placeholder: "Emailinizi girin...",
+      autoCapitalize: "none",
+      keyboardType: "email-address",
+    }),
+    t.createElement(F, {
+      value: password,
+      onChange: setPassword,
+      title: "Password",
+      placeholder: "Şifrenizi girin...",
+      secureTextEntry: true,
+    }),
+    t.createElement(G, {
+      onPress: addAccountWithEmailPassword,
+      text: "Add Account with Email & Password",
+      style: { marginBottom: 20, backgroundColor: "#5865F2" },
+    }),
+    t.createElement(n.FormDivider, null),
+    Boolean(_.getToken()) && t.createElement(G, {
+      onPress: addCurrentAccount,
+      text: "Add Current Account",
+      style: { marginBottom: 20, backgroundColor: "#2DC770" },
+    }),
+    t.createElement(n.FormDivider, null),
+    t.createElement(S, { style: { marginTop: 20, marginBottom: 8, color: x.HEADER_SECONDARY, fontSize: 12 } }, "Veya token ile ekleyin:"),
     t.createElement(F, {
       disabled: Boolean(i),
-      value: a,
-      onChange: (u) => c(u),
+      value: token,
+      onChange: setToken,
       title: "Account Token",
       placeholder: "Token yapıştır...",
     }),
-    t.createElement(F, { value: l, onChange: (u) => s(u), title: "Label", placeholder: "Hesap adı..." }),
-    t.createElement(
-      g,
-      { style: { flexDirection: "row", alignItems: "center", marginTop: 12 } },
-      t.createElement(G, {
-        onPress: async function () {
-          try {
-            if (!a) {
-              z.open({ content: "Token giriniz.", source: A.TrashFilled });
-              return;
-            }
-            const u = m || (await Q(a));
-            if (!u || !u.id) {
-              z.open({ content: "Geçersiz token veya hesap bulunamadı.", source: A.TrashFilled });
-              return;
-            }
-            const M = e.get("accounts", []);
-            M.push({
-              token: a,
-              user: u,
-              label: l || null,
-              description: null,
-              color: null,
-              addedDate: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
-            });
-            e.set("accounts", M);
-            z.open({ content: "Hesap eklendi!", source: A.Checkmark });
-            o.goBack();
-          } catch (ex) {
-            z.open({ content: "Hata: " + (ex.message || "Bilinmeyen hata"), source: A.TrashFilled });
-          }
-        },
-        text: "Add account",
-      }),
-    ),
+    t.createElement(F, { value: label, onChange: setLabel, title: "Label", placeholder: "Hesap adı..." }),
+    t.createElement(G, {
+      onPress: addAccountWithToken,
+      text: "Add Account with Token",
+    }),
   );
 }
 function ce({ settings: e, navigation: o = I.useNavigation() }) {
