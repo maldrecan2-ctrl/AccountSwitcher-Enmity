@@ -751,77 +751,62 @@ function xe(e) {
           ((s = l.type) == null ? void 0 : s.name) === "UserSettingsOverview"
         );
       });
-      (e.after(
-        c.type.prototype,
-        "render",
-        ({ props: { navigation: l } }, s, d) => {
-          let pluginsRowParent = null;
-          let pluginsRowIdx = -1;
 
-          Y(d, (node) => {
-            const children = node && (node.children || (node.props && node.props.children));
-            if (Array.isArray(children)) {
-              const idx = children.findIndex((c) => c && c.props && c.props.label === "Plugins");
-              if (idx !== -1) {
-                pluginsRowParent = children;
-                pluginsRowIdx = idx;
-                return true;
-              }
+      if (!c || !c.type) {
+        r();
+        return;
+      }
+
+      const patchRender = ({ props: { navigation: l } }, s, d) => {
+        let targetParent = null;
+        let targetIdx = -1;
+
+        Y(d, (node) => {
+          const children = node && (node.children || (node.props && node.props.children));
+          if (Array.isArray(children)) {
+            let idx = children.findIndex((ch) => ch && ch.props && ch.props.label === T.Messages.ACCOUNT);
+            if (idx !== -1) {
+              targetParent = children;
+              targetIdx = idx;
+              return true;
             }
-            return false;
-          });
-
-          if (pluginsRowParent && pluginsRowIdx !== -1) {
-            const hasAS = pluginsRowParent.some((c) => c && c.props && c.props.label === "Account Switcher");
-            if (!hasAS) {
-              pluginsRowParent.splice(
-                pluginsRowIdx + 1,
-                0,
-                t.createElement(n.FormDivider, null),
-                t.createElement(p, {
-                  label: "Account Switcher",
-                  leading: t.createElement(p.Icon, { source: A.MyAccount }),
-                  trailing: p.Arrow,
-                  onPress: () => l.navigate("AccountSwitcherMain"),
-                })
-              );
-            }
-          } else {
-            let logoutParent = null;
-            let logoutIdx = -1;
-
-            Y(d, (node) => {
-              const children = node && (node.children || (node.props && node.props.children));
-              if (Array.isArray(children)) {
-                const idx = children.findIndex((c) => c && c.props && c.props.label === T.Messages.LOGOUT);
-                if (idx !== -1) {
-                  logoutParent = children;
-                  logoutIdx = idx;
-                  return true;
-                }
-              }
-              return false;
-            });
-
-            if (logoutParent && logoutIdx !== -1) {
-              const hasAS = logoutParent.some((c) => c && c.props && c.props.label === "Account Switcher");
-              if (!hasAS) {
-                logoutParent.splice(
-                  logoutIdx,
-                  0,
-                  t.createElement(p, {
-                    label: "Account Switcher",
-                    leading: t.createElement(p.Icon, { source: A.MyAccount }),
-                    trailing: p.Arrow,
-                    onPress: () => l.navigate("AccountSwitcherMain"),
-                  })
-                );
-              }
+            idx = children.findIndex((ch) => ch && ch.props && ch.props.label === T.Messages.PRIVACY_AND_SAFETY);
+            if (idx !== -1) {
+              targetParent = children;
+              targetIdx = idx;
+              return true;
             }
           }
-        },
-      ),
-        r());
+          return false;
+        });
+
+        if (targetParent && targetIdx !== -1) {
+          const hasAS = targetParent.some((ch) => ch && ch.props && ch.props.label === "Account Switcher");
+          if (!hasAS) {
+            const isAccount = targetParent[targetIdx].props.label === T.Messages.ACCOUNT;
+            const insertIdx = isAccount ? targetIdx + 1 : targetIdx;
+
+            targetParent.splice(
+              insertIdx,
+              0,
+              t.createElement(n.FormDivider, null),
+              t.createElement(p, {
+                label: "Account Switcher",
+                leading: t.createElement(p.Icon, { source: A.MyAccount }),
+                trailing: p.Arrow,
+                onPress: () => l.navigate("AccountSwitcherMain"),
+              })
+            );
+          }
+        }
+      };
+
+      if (c.type.prototype && c.type.prototype.render) {
+        e.after(c.type.prototype, "render", patchRender);
+      } else {
+        e.after(c, "type", patchRender);
+      }
+      r();
     });
 }
 function Be(e) {
