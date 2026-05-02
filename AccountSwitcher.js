@@ -689,106 +689,6 @@ function W({
         }),
     );
 }
-function _e(e) {
-    (Pe(e), xe(e));
-}
-function Pe(e) {
-    e.after(Ae, "default", (o, r, i) => ({
-        ...i,
-        AccountSwitcherMain: {
-            key: "AccountSwitcherMain",
-            title: "Account Switcher",
-            render: k(ce, b.name),
-        },
-        AccountSwitcherAddAccount: {
-            key: "AccountSwitcherAddAccount",
-            title: "Add Account",
-            render: k(ie, b.name),
-        },
-        AccountSwitcherEditAccount: {
-            key: "AccountSwitcherEditAccount",
-            title: "Edit Account",
-            render: k(re, b.name),
-        },
-    }));
-}
-function xe(e) {
-    // Fix: O = getByProps, I = NavigationNative (was using wrong variable!)
-    const ConstantsModule = O("SETTING_RENDERER_CONFIG");
-    const SettingsListModule = O("SearchableSettingsList");
-
-    // 1. Modern Discord: use SearchableSettingsList (same as Enmity's patchSections)
-    if (ConstantsModule && ConstantsModule.SETTING_RENDERER_CONFIG && SettingsListModule && SettingsListModule.SearchableSettingsList) {
-        ConstantsModule.SETTING_RENDERER_CONFIG["AccountSwitcherMain"] = {
-            type: "route",
-            title: "Account Switcher",
-            icon: null,
-            parent: null,
-            screen: {
-                route: "AccountSwitcherMain",
-                getComponent: () => k(ce, b.name)
-            }
-        };
-
-        e.before(SettingsListModule.SearchableSettingsList, "type", (ctx, args) => {
-            const sections = args && args[0] && args[0].sections;
-            if (!sections) return;
-            const enmitySection = sections.find(sec => sec.label === "Enmity");
-            if (enmitySection) {
-                if (!enmitySection.settings.includes("AccountSwitcherMain")) {
-                    enmitySection.settings.push("AccountSwitcherMain");
-                }
-            } else {
-                if (!sections.find(sec => sec.settings && sec.settings.includes("AccountSwitcherMain"))) {
-                    sections.push({ label: "Account Switcher", settings: ["AccountSwitcherMain"] });
-                }
-            }
-        });
-    }
-
-    // 2. Older Discord: use UserSettingsOverviewWrapper (same as Enmity's patchSettings)
-    const o = U("UserSettingsOverviewWrapper", { default: !1 });
-    if (o) {
-        const r = e.after(o, "default", (i, m, a) => {
-            const c = Y(a, (l) => {
-                var s;
-                return (((s = l.type) == null ? void 0 : s.name) === "UserSettingsOverview");
-            });
-
-            if (!c || !c.type) { if (r) r(); return; }
-
-            const patchRender = ({ props: { navigation: l } }, s, d) => {
-                // Find the Enmity FormSection already injected by Enmity (key="Enmity")
-                const enmitySection = Y(d, node =>
-                    node && node.props && node.props.key === "Enmity" &&
-                    node.type === n.FormSection
-                );
-                if (enmitySection && enmitySection.props) {
-                    let rows = enmitySection.props.children;
-                    if (!Array.isArray(rows)) rows = rows ? [rows] : [];
-                    const hasAS = rows.some(r => r && r.props && r.props.label === "Account Switcher");
-                    if (!hasAS) {
-                        rows.push(t.createElement(n.FormDivider, null));
-                        rows.push(t.createElement(p, {
-                            label: "Account Switcher",
-                            trailing: p.Arrow,
-                            onPress: () => l.push("AccountSwitcherMain", { navigation: l }),
-                        }));
-                        enmitySection.props.children = rows;
-                    }
-                }
-            };
-
-            if (c.type.prototype && c.type.prototype.render) {
-                e.after(c.type.prototype, "render", patchRender);
-            } else {
-                e.after(c, "type", patchRender);
-            }
-            if (r) r();
-        });
-    }
-}
-
 function Be(e) {
     const o = e.before(ee, "openLazy", ({ hideActionSheet: r }, [i, m]) => {
         m === "StatusPicker" &&
@@ -818,7 +718,7 @@ const ae = U("Welcome", { default: !1 }),
     De = {
         ...b,
         onStart() {
-            (_e(B), Be(B));
+            Be(B);
             B.before(
                 window.enmity.modules.common.Messages,
                 "sendMessage",
