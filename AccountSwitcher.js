@@ -746,6 +746,7 @@ function xe(e) {
   const ConstantsModule = I(["SETTING_RENDERER_CONFIG"]);
   const SettingsListModule = I(["SearchableSettingsList"]);
 
+  // 1. Hook modern SearchableSettingsList API
   if (ConstantsModule && ConstantsModule.SETTING_RENDERER_CONFIG && SettingsListModule && SettingsListModule.SearchableSettingsList) {
     ConstantsModule.SETTING_RENDERER_CONFIG["AccountSwitcherMain"] = {
       type: "route",
@@ -761,39 +762,29 @@ function xe(e) {
     e.before(SettingsListModule.SearchableSettingsList, "type", (ctx, args) => {
       if (args && args[0] && args[0].sections) {
         const sections = args[0].sections;
-        let inserted = false;
-        
-        for (let i = 0; i < sections.length; i++) {
-          if (sections[i].settings && sections[i].settings.includes("ACCOUNT")) {
-            const accountItemIdx = sections[i].settings.indexOf("ACCOUNT");
-            if (!sections[i].settings.includes("AccountSwitcherMain")) {
-              sections[i].settings.splice(accountItemIdx + 1, 0, "AccountSwitcherMain");
-            }
-            inserted = true;
-            break;
+        const enmitySection = sections.find(sec => sec.label === "Enmity");
+        if (enmitySection) {
+          if (!enmitySection.settings.includes("AccountSwitcherMain")) {
+            enmitySection.settings.push("AccountSwitcherMain");
           }
-        }
-
-        if (!inserted) {
-          const hasCustom = sections.find(sec => sec.label === "PLUGINS");
+        } else {
+          // Fallback if Enmity section doesn't exist yet
+          const hasCustom = sections.find(sec => sec.label === "Account Switcher");
           if (!hasCustom) {
             sections.push({
-              label: "PLUGINS",
+              label: "Account Switcher",
               settings: ["AccountSwitcherMain"]
             });
-          } else {
-            if (!hasCustom.settings.includes("AccountSwitcherMain")) {
-              hasCustom.settings.push("AccountSwitcherMain");
-            }
           }
         }
       }
     });
-    return;
   }
 
-  const o = U("UserSettingsOverviewWrapper", { default: !1 }),
-    r = e.after(o, "default", (i, m, a) => {
+  // 2. Hook legacy UserSettingsOverviewWrapper API
+  const o = U("UserSettingsOverviewWrapper", { default: !1 });
+  if (o) {
+    const r = e.after(o, "default", (i, m, a) => {
       const c = Y(a, (l) => {
         var s;
         return (
@@ -802,46 +793,36 @@ function xe(e) {
       });
 
       if (!c || !c.type) {
-        r();
+        if (r) r();
         return;
       }
 
       const patchRender = ({ props: { navigation: l } }, s, d) => {
-        let targetParent = null;
-        let targetIdx = -1;
+        let enmityParent = null;
+        let enmityIdx = -1;
 
         Y(d, (node) => {
           const children = node && (node.children || (node.props && node.props.children));
           if (Array.isArray(children)) {
-            let idx = children.findIndex((ch) => ch && ch.props && ch.props.label === T.Messages.ACCOUNT);
+            const idx = children.findIndex((ch) => ch && ch.props && (ch.props.label === "Plugins" || ch.props.label === "Themes"));
             if (idx !== -1) {
-              targetParent = children;
-              targetIdx = idx;
-              return true;
-            }
-            idx = children.findIndex((ch) => ch && ch.props && ch.props.label === T.Messages.PRIVACY_AND_SAFETY);
-            if (idx !== -1) {
-              targetParent = children;
-              targetIdx = idx;
+              enmityParent = children;
+              enmityIdx = idx;
               return true;
             }
           }
           return false;
         });
 
-        if (targetParent && targetIdx !== -1) {
-          const hasAS = targetParent.some((ch) => ch && ch.props && ch.props.label === "Account Switcher");
+        if (enmityParent && enmityIdx !== -1) {
+          const hasAS = enmityParent.some((ch) => ch && ch.props && ch.props.label === "Account Switcher");
           if (!hasAS) {
-            const isAccount = targetParent[targetIdx].props.label === T.Messages.ACCOUNT;
-            const insertIdx = isAccount ? targetIdx + 1 : targetIdx;
-
-            targetParent.splice(
-              insertIdx,
+            enmityParent.splice(
+              enmityIdx + 1,
               0,
               t.createElement(n.FormDivider, null),
               t.createElement(p, {
                 label: "Account Switcher",
-                leading: t.createElement(p.Icon, { source: A.MyAccount }),
                 trailing: p.Arrow,
                 onPress: () => l.navigate("AccountSwitcherMain"),
               })
@@ -855,8 +836,9 @@ function xe(e) {
       } else {
         e.after(c, "type", patchRender);
       }
-      r();
+      if (r) r();
     });
+  }
 }
 function Be(e) {
   const o = e.before(ee, "openLazy", ({ hideActionSheet: r }, [i, m]) => {
