@@ -748,10 +748,17 @@ function xe(e) {
       e.after(c.type.prototype, "render", ({ props: { navigation: l } }, s, d) => {
         const { children: y } = d.props,
           h = y.findIndex((E) => T.Messages.LOGOUT === (E == null ? void 0 : E.props.label));
-        y[h].props.label = "Account Switcher";
-        y[h].props.onPress = () => {
-          l.navigate("AccountSwitcherMain");
+        const accountSwitcherEntry = {
+          ...y[h],
+          props: {
+            ...y[h].props,
+            label: "Account Switcher",
+            onPress: () => {
+              l.navigate("AccountSwitcherMain");
+            },
+          },
         };
+        y.splice(h, 0, accountSwitcherEntry);
       });
       r();
     });
