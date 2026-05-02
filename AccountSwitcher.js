@@ -642,11 +642,17 @@ function ie({
   );
 }
 function ce({ settings: e, navigation: o = I.useNavigation() }) {
-  return t.createElement(Me, { settings: e, navigation: o });
+  t.useEffect(() => {
+    setTimeout(() => {
+      R.push(W, { name: b.name });
+    }, 100);
+  }, []);
+  
+  return t.createElement(g, null);
 }
 function W({
   name: e = "pluginName",
-  mainScreen: o = ce,
+  mainScreen: o = Me,
   addAccount: r = ie,
 } = {}) {
   const i = L({
@@ -715,7 +721,58 @@ function W({
   );
 }
 function _e(e) {
-  xe(e);
+  (Pe(e), xe(e));
+}
+function Pe(e) {
+  e.after(Ae, "default", (o, r, i) => ({
+    ...i,
+    AccountSwitcherMain: {
+      key: "AccountSwitcherMain",
+      title: "Account Switcher",
+      render: k(ce, b.name),
+      headerRight: oe,
+    },
+    AccountSwitcherAddAccount: {
+      key: "AccountSwitcherAddAccount",
+      title: "Add Account",
+      render: k(ie, b.name),
+    },
+    AccountSwitcherEditAccount: {
+      key: "AccountSwitcherEditAccount",
+      title: "Edit Account",
+      render: k(re, b.name),
+    },
+  }));
+  const ConstantsModule = O("SETTING_RENDERER_CONFIG");
+  const SettingsListModule = O("SearchableSettingsList");
+
+  if (ConstantsModule && ConstantsModule.SETTING_RENDERER_CONFIG && SettingsListModule && SettingsListModule.SearchableSettingsList) {
+    ConstantsModule.SETTING_RENDERER_CONFIG["AccountSwitcherMain"] = {
+      type: "route",
+      title: "Account Switcher",
+      icon: null,
+      parent: null,
+      screen: {
+        route: "AccountSwitcherMain",
+        getComponent: () => k(ce, b.name)
+      }
+    };
+
+    e.before(SettingsListModule.SearchableSettingsList, "type", (ctx, args) => {
+      const sections = args && args[0] && args[0].sections;
+      if (!sections) return;
+      const enmitySection = sections.find(sec => sec.label === "Enmity");
+      if (enmitySection) {
+        if (!enmitySection.settings.includes("AccountSwitcherMain")) {
+          enmitySection.settings.push("AccountSwitcherMain");
+        }
+      } else {
+        if (!sections.find(sec => sec.settings && sec.settings.includes("AccountSwitcherMain"))) {
+          sections.push({ label: "Account Switcher", settings: ["AccountSwitcherMain"] });
+        }
+      }
+    });
+  }
 }
 function xe(e) {
   const o = U("UserSettingsOverviewWrapper", { default: !1 });
