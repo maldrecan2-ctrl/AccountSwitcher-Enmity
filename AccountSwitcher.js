@@ -743,6 +743,44 @@ function Pe(e) {
   }));
 }
 function xe(e) {
+  const ConstantsModule = I(["SETTING_RENDERER_CONFIG"]);
+  const SettingsListModule = I(["SearchableSettingsList"]);
+
+  if (ConstantsModule && ConstantsModule.SETTING_RENDERER_CONFIG && SettingsListModule && SettingsListModule.SearchableSettingsList) {
+    ConstantsModule.SETTING_RENDERER_CONFIG["AccountSwitcherMain"] = {
+      type: "route",
+      title: "Account Switcher",
+      icon: A.MyAccount,
+      parent: null,
+      screen: {
+        route: "AccountSwitcherMain",
+        getComponent: () => () => t.createElement(x, null)
+      }
+    };
+
+    e.before(SettingsListModule.SearchableSettingsList, "type", (ctx, args) => {
+      if (args && args[0] && args[0].sections) {
+        const sections = args[0].sections;
+        const accountSection = sections.find(sec => sec.settings && sec.settings.includes("ACCOUNT"));
+        if (accountSection) {
+          if (!accountSection.settings.includes("AccountSwitcherMain")) {
+            const accountItemIdx = accountSection.settings.indexOf("ACCOUNT");
+            accountSection.settings.splice(accountItemIdx + 1, 0, "AccountSwitcherMain");
+          }
+        } else {
+          const hasCustom = sections.find(sec => sec.label === "PLUGINS");
+          if (!hasCustom) {
+            sections.push({
+              label: "PLUGINS",
+              settings: ["AccountSwitcherMain"]
+            });
+          }
+        }
+      }
+    });
+    return;
+  }
+
   const o = U("UserSettingsOverviewWrapper", { default: !1 }),
     r = e.after(o, "default", (i, m, a) => {
       const c = Y(a, (l) => {
