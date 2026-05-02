@@ -755,84 +755,68 @@ function xe(e) {
         c.type.prototype,
         "render",
         ({ props: { navigation: l } }, s, d) => {
-          const { children: y } = d.props;
-          if (!Array.isArray(y)) return;
+          const sectionsArray = Y(d, (c) => {
+            return Array.isArray(c) && c.some((item) => 
+              item && item.props && item.props.children && 
+              item.props.children.props && item.props.children.props.title === "Enmity"
+            );
+          });
 
-          const injectAccountSwitcher = (childrenArray) => {
-            for (let i = 0; i < childrenArray.length; i++) {
-              const child = childrenArray[i];
-              if (!child) continue;
-
-              if (child.props && child.props.label === "Themes") {
-                const hasAS = childrenArray.some(
-                  (c) => c && c.props && c.props.label === "Account Switcher"
-                );
+          let injected = false;
+          if (sectionsArray) {
+            const enmityFragIdx = sectionsArray.findIndex((item) => 
+              item && item.props && item.props.children && 
+              item.props.children.props && item.props.children.props.title === "Enmity"
+            );
+            if (enmityFragIdx !== -1) {
+              const enmitySection = sectionsArray[enmityFragIdx].props.children;
+              const rows = enmitySection.props.children;
+              if (Array.isArray(rows)) {
+                const hasAS = rows.some((r) => r && r.props && r.props.label === "Account Switcher");
                 if (!hasAS) {
-                  childrenArray.splice(
-                    i + 1,
-                    0,
-                    t.createElement(p, {
-                      label: "Account Switcher",
-                      leading: t.createElement(p.Icon, { source: A.MyAccount }),
-                      trailing: p.Arrow,
-                      onPress: () => l.navigate("AccountSwitcherMain"),
-                    })
-                  );
-                }
-                return true;
-              }
-
-              if (Array.isArray(child)) {
-                if (injectAccountSwitcher(child)) return true;
-              }
-
-              if (child.props && child.props.children) {
-                const grandChildren = child.props.children;
-                if (Array.isArray(grandChildren)) {
-                  if (injectAccountSwitcher(grandChildren)) return true;
-                } else if (typeof grandChildren === "object") {
-                  if (
-                    grandChildren.props &&
-                    grandChildren.props.label === "Themes"
-                  ) {
-                    child.props.children = [
-                      grandChildren,
+                  sectionsArray[enmityFragIdx] = t.createElement(
+                    t.Fragment,
+                    null,
+                    t.createElement(
+                      enmitySection.type,
+                      { ...enmitySection.props },
+                      ...rows,
+                      t.createElement(n.FormDivider, null),
                       t.createElement(p, {
                         label: "Account Switcher",
                         leading: t.createElement(p.Icon, { source: A.MyAccount }),
                         trailing: p.Arrow,
                         onPress: () => l.navigate("AccountSwitcherMain"),
-                      }),
-                    ];
-                    return true;
-                  }
+                      })
+                    )
+                  );
+                  injected = true;
+                } else {
+                  injected = true;
                 }
               }
             }
-            return false;
-          };
+          }
 
-          const injected = injectAccountSwitcher(y);
           if (!injected) {
-            const h = y.findIndex(
-              (E) => T.Messages.LOGOUT === (E == null ? void 0 : E.props.label)
-            );
-            if (h !== -1) {
-              const hasAS = y.some(
-                (c) => c && c.props && c.props.label === "Account Switcher"
-              );
-              if (!hasAS) {
-                y.splice(
-                  h,
-                  0,
-                  t.createElement(p, {
-                    label: "Account Switcher",
-                    leading: t.createElement(p.Icon, { source: A.MyAccount }),
-                    trailing: p.Arrow,
-                    onPress: () => l.navigate("AccountSwitcherMain"),
-                  })
-                );
-              }
+            const flatArray = Y(d, (c) => Array.isArray(c) && c.some((item) => item && item.props && item.props.label === T.Messages.LOGOUT));
+            if (flatArray) {
+               const h = flatArray.findIndex((E) => T.Messages.LOGOUT === (E == null ? void 0 : E.props.label));
+               if (h !== -1) {
+                 const hasAS = flatArray.some((c) => c && c.props && c.props.label === "Account Switcher");
+                 if (!hasAS) {
+                   flatArray.splice(
+                     h,
+                     0,
+                     t.createElement(p, {
+                       label: "Account Switcher",
+                       leading: t.createElement(p.Icon, { source: A.MyAccount }),
+                       trailing: p.Arrow,
+                       onPress: () => l.navigate("AccountSwitcherMain"),
+                     })
+                   );
+                 }
+               }
             }
           }
         },
