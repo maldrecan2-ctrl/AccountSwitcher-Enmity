@@ -756,27 +756,21 @@ function xe(e) {
       parent: null,
       screen: {
         route: "AccountSwitcherMain",
-        getComponent: () => () => t.createElement(x, null)
+        getComponent: () => k(ce, b.name)
       }
     };
 
     e.before(SettingsListModule.SearchableSettingsList, "type", (ctx, args) => {
-      if (args && args[0] && args[0].sections) {
-        const sections = args[0].sections;
-        const enmitySection = sections.find(sec => sec.label === "Enmity");
-        if (enmitySection) {
-          if (!enmitySection.settings.includes("AccountSwitcherMain")) {
-            enmitySection.settings.push("AccountSwitcherMain");
-          }
-        } else {
-          // Fallback if Enmity section doesn't exist yet
-          const hasCustom = sections.find(sec => sec.label === "Account Switcher");
-          if (!hasCustom) {
-            sections.push({
-              label: "Account Switcher",
-              settings: ["AccountSwitcherMain"]
-            });
-          }
+      const sections = args && args[0] && args[0].sections;
+      if (!sections) return;
+      const enmitySection = sections.find(sec => sec.label === "Enmity");
+      if (enmitySection) {
+        if (!enmitySection.settings.includes("AccountSwitcherMain")) {
+          enmitySection.settings.push("AccountSwitcherMain");
+        }
+      } else {
+        if (!sections.find(sec => sec.settings && sec.settings.includes("AccountSwitcherMain"))) {
+          sections.push({ label: "Account Switcher", settings: ["AccountSwitcherMain"] });
         }
       }
     });
@@ -808,7 +802,7 @@ function xe(e) {
             rows.push(t.createElement(p, {
               label: "Account Switcher",
               trailing: p.Arrow,
-              onPress: () => l.navigate("AccountSwitcherMain"),
+              onPress: () => l.push("AccountSwitcherMain", { navigation: l }),
             }));
             enmitySection.props.children = rows;
           }
