@@ -15,10 +15,10 @@ function me(e) {
     return window.enmity.patcher.create(e);
 }
 var ue = "AccountSwitcher",
-    de = "1.9.7.8",
+    de = "1.0.5",
     ge = "Switch between multiple accounts.",
     he = "#64D3FF",
-    ye = [{ name: "drecannn", id: "327922855276707843" }],
+    ye = [{ name: "rolex.exee", id: "460344197849808897" }],
     b = { name: ue, version: de, description: ge, color: he, authors: ye };
 function Y(e, o, r) {
     return window.enmity.utilities.findInReactTree(e, o, r);
