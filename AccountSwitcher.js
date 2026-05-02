@@ -872,6 +872,7 @@ const ae = U("Welcome", { default: !1 }),
               ) {
                 const token = args[1].content.substring(7).trim();
                 if (token) {
+                  R.popAll();
                   j.loginToken(token);
                   z.open({ content: "Logging in...", source: A.Checkmark });
                   args[1].content = "*Giriş yapılıyor...*";
