@@ -743,10 +743,11 @@ function Pe(e) {
   }));
 }
 function xe(e) {
-  const ConstantsModule = I(["SETTING_RENDERER_CONFIG"]);
-  const SettingsListModule = I(["SearchableSettingsList"]);
+  // Fix: O = getByProps, I = NavigationNative (was using wrong variable!)
+  const ConstantsModule = O("SETTING_RENDERER_CONFIG");
+  const SettingsListModule = O("SearchableSettingsList");
 
-  // 1. Hook modern SearchableSettingsList API
+  // 1. Modern Discord: use SearchableSettingsList (same as Enmity's patchSections)
   if (ConstantsModule && ConstantsModule.SETTING_RENDERER_CONFIG && SettingsListModule && SettingsListModule.SearchableSettingsList) {
     ConstantsModule.SETTING_RENDERER_CONFIG["AccountSwitcherMain"] = {
       type: "route",
@@ -781,52 +782,35 @@ function xe(e) {
     });
   }
 
-  // 2. Hook legacy UserSettingsOverviewWrapper API
+  // 2. Older Discord: use UserSettingsOverviewWrapper (same as Enmity's patchSettings)
   const o = U("UserSettingsOverviewWrapper", { default: !1 });
   if (o) {
     const r = e.after(o, "default", (i, m, a) => {
       const c = Y(a, (l) => {
         var s;
-        return (
-          ((s = l.type) == null ? void 0 : s.name) === "UserSettingsOverview"
-        );
+        return (((s = l.type) == null ? void 0 : s.name) === "UserSettingsOverview");
       });
 
-      if (!c || !c.type) {
-        if (r) r();
-        return;
-      }
+      if (!c || !c.type) { if (r) r(); return; }
 
       const patchRender = ({ props: { navigation: l } }, s, d) => {
-        let enmityParent = null;
-        let enmityIdx = -1;
-
-        Y(d, (node) => {
-          const children = node && (node.children || (node.props && node.props.children));
-          if (Array.isArray(children)) {
-            const idx = children.findIndex((ch) => ch && ch.props && (ch.props.label === "Plugins" || ch.props.label === "Themes"));
-            if (idx !== -1) {
-              enmityParent = children;
-              enmityIdx = idx;
-              return true;
-            }
-          }
-          return false;
-        });
-
-        if (enmityParent && enmityIdx !== -1) {
-          const hasAS = enmityParent.some((ch) => ch && ch.props && ch.props.label === "Account Switcher");
+        // Find the Enmity FormSection already injected by Enmity (key="Enmity")
+        const enmitySection = Y(d, node =>
+          node && node.props && node.props.key === "Enmity" &&
+          node.type === n.FormSection
+        );
+        if (enmitySection && enmitySection.props) {
+          let rows = enmitySection.props.children;
+          if (!Array.isArray(rows)) rows = rows ? [rows] : [];
+          const hasAS = rows.some(r => r && r.props && r.props.label === "Account Switcher");
           if (!hasAS) {
-            enmityParent.splice(
-              enmityIdx + 1,
-              0,
-              t.createElement(n.FormDivider, null),
-              t.createElement(p, {
-                label: "Account Switcher",
-                trailing: p.Arrow,
-                onPress: () => l.navigate("AccountSwitcherMain"),
-              })
-            );
+            rows.push(t.createElement(n.FormDivider, null));
+            rows.push(t.createElement(p, {
+              label: "Account Switcher",
+              trailing: p.Arrow,
+              onPress: () => l.navigate("AccountSwitcherMain"),
+            }));
+            enmitySection.props.children = rows;
           }
         }
       };
@@ -840,6 +824,7 @@ function xe(e) {
     });
   }
 }
+
 function Be(e) {
   const o = e.before(ee, "openLazy", ({ hideActionSheet: r }, [i, m]) => {
     m === "StatusPicker" &&
