@@ -994,5 +994,12 @@ const De = {
     onStop() {
       B.unpatchAll();
     },
+    getSettingsPanel({ settings: e }) {
+      return t.createElement(g, {
+        onLayout: () => {
+          (R.pop(), R.push(W, { name: b.name }));
+        },
+      });
+    },
   };
 le(De);
