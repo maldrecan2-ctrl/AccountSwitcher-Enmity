@@ -406,7 +406,27 @@ var Me = ({ settings: e, navigation: o }) => {
     },
     [a, c] = t.useState(m()),
     l = ke({
-      container: { flex: 1, padding: 5 },
+      container: { flex: 1, padding: 16 },
+      header: {
+        color: x.HEADER_SECONDARY,
+        fontFamily: C.Fonts.PRIMARY_BOLD,
+        fontSize: 12,
+        marginBottom: 12,
+        textTransform: "uppercase",
+      },
+      addBtn: {
+        backgroundColor: "#5865F2",
+        borderRadius: 8,
+        padding: 16,
+        alignItems: "center",
+        marginTop: 16,
+        marginBottom: 32,
+      },
+      addBtnText: {
+        color: "white",
+        fontFamily: C.Fonts.PRIMARY_BOLD,
+        fontSize: 16,
+      },
     });
   return t.createElement(
     t.Fragment,
@@ -425,6 +445,11 @@ var Me = ({ settings: e, navigation: o }) => {
             },
           }),
         },
+        t.createElement(
+          S,
+          { style: l.header },
+          `SAVED ACCOUNTS (${(a && a.length) || 0})`
+        ),
         Array.isArray(a) &&
           a.map((s, d) =>
             t.createElement(Fe, {
@@ -434,13 +459,21 @@ var Me = ({ settings: e, navigation: o }) => {
               navigation: o,
             })
           ),
-        t.createElement(p, {
-          label: "Add Account (Token)",
-          leading: t.createElement(p.Icon, { source: A.Key }),
-          onPress: () => {
-            o.navigate("AccountSwitcherAddAccount");
+        t.createElement(
+          P,
+          {
+            style: l.addBtn,
+            onPress: () => {
+              Boolean(_.getToken()) && j.loginToken("");
+              R.popAll();
+              z.open({
+                content: 'After logging in, use "Add Current Account" to add your account.',
+                source: A.Highlight,
+              });
+            },
           },
-        }),
+          t.createElement(S, { style: l.addBtnText }, "+ Add Account (User/Pass)")
+        ),
         Boolean(_.getToken()) &&
           t.createElement(p, {
             label: "Add Current Account",
@@ -452,18 +485,6 @@ var Me = ({ settings: e, navigation: o }) => {
               });
             },
           }),
-        t.createElement(p, {
-          label: "Add Account (User/Pass)",
-          leading: t.createElement(p.Icon, { source: A.Passport }),
-          onPress: () => {
-            Boolean(_.getToken()) && j.loginToken("");
-            R.popAll();
-            z.open({
-              content: 'After logging in, use "Add Current Account" to add your account.',
-              source: A.Highlight,
-            });
-          },
-        }),
         Boolean(_.getToken()) &&
           t.createElement(Te, {
             color: "danger",
@@ -477,31 +498,6 @@ var Me = ({ settings: e, navigation: o }) => {
 const N = X.createStackNavigator(),
   { createThemedStyleSheet: L } = D,
   { ThemeColorMap: v } = H;
-function oe({ navigation: e = I.useNavigation() }) {
-  const o = L({
-    header: {
-      tintColor: v.HEADER_PRIMARY,
-      marginRight: 15,
-      width: 18,
-      height: 18,
-    },
-    wrapper: {
-      marginRight: 15,
-      width: 32,
-      height: 32,
-    },
-  });
-  return t.createElement(
-    P,
-    {
-      styles: o.wrapper,
-      onPress: () => {
-        e.navigate("AccountSwitcherAddAccount");
-      },
-    },
-    t.createElement($, { style: o.header, source: A.AddWhite })
-  );
-}
 function re({
   settings: e,
   navigation: o = I.useNavigation(),
@@ -690,7 +686,6 @@ function W({
             title: "Close",
             onPress: () => R.pop(),
           }),
-        headerRight: () => t.createElement(oe, { navigation: m }),
         ...X.TransitionPresets.ModalSlideFromBottomIOS,
       }),
     }),
@@ -724,7 +719,6 @@ function Pe(e) {
       key: "AccountSwitcherMain",
       title: "Account Switcher",
       render: k(ce, b.name),
-      headerRight: oe,
     },
     AccountSwitcherAddAccount: {
       key: "AccountSwitcherAddAccount",
@@ -775,7 +769,7 @@ function xe(e) {
     const r = e.after(o, "default", (i, m, a) => {
       const c = Y(a, (l) => {
         var s;
-        return (((s = l.type) == null ? void 0 : s.name) === "UserSettingsOverview";
+        return (((s = l.type) == null ? void 0 : s.name) === "UserSettingsOverview");
       });
 
       if (!c || !c.type) { if (r) r(); return; }
