@@ -847,92 +847,114 @@ function Be(e) {
   const o = e.before(ee, "openLazy", ({ hideActionSheet: r }, [i, m]) => {
     m === "StatusPicker" &&
       i.then((a) => {
-        (e.after(a, "default", (c, l, s) => {
-          const d = s.props.children[1].props.children.props.children;
-          d.push({
-            ...d[0],
-            props: {
-              children: t.createElement(p, {
-                leading: t.createElement(p.Icon, { source: A.Sort }),
-                label: T.Messages.SWITCH_ACCOUNTS_MENU_ITEM_TITLE,
-                trailing: p.Arrow,
-                onPress: () => {
-                  (r(), R.push(W, { name: b.name }));
+        try {
+          e.after(a, "default", (c, l, s) => {
+            try {
+              const list =
+                s &&
+                s.props &&
+                s.props.children &&
+                s.props.children[1] &&
+                s.props.children[1].props &&
+                s.props.children[1].props.children &&
+                s.props.children[1].props.children.props &&
+                s.props.children[1].props.children.props.children;
+              if (!Array.isArray(list) || list.length === 0) return;
+              const hasEntry = list.some(
+                (x) => x && x.props && x.props.children && x.props.children.props && x.props.children.props.label === T.Messages.SWITCH_ACCOUNTS_MENU_ITEM_TITLE
+              );
+              if (hasEntry) return;
+              list.push({
+                ...list[0],
+                props: {
+                  children: t.createElement(p, {
+                    leading: t.createElement(p.Icon, { source: A.Sort }),
+                    label: T.Messages.SWITCH_ACCOUNTS_MENU_ITEM_TITLE,
+                    trailing: p.Arrow,
+                    onPress: () => {
+                      r();
+                      R.push(W, { name: b.name });
+                    },
+                  }),
                 },
-              }),
-            },
+              });
+            } catch (_) {}
           });
-        }),
-          o());
+          o();
+        } catch (_) {}
       });
   });
 }
 const ae = U("Welcome", { default: !1 }),
-  B = me("account-switcher"),
-  De = {
-    ...b,
-    onStart() {
-      (_e(B), Be(B));
-      B.before(
-        window.enmity.modules.common.Messages,
-        "sendMessage",
-        function (ctx, args) {
-          if (
-            typeof args[1]?.content === "string" &&
-            args[1].content.startsWith("/login ")
-          ) {
-            const token = args[1].content.substring(7).trim();
-            if (token) {
-              j.loginToken(token);
-              z.open({ content: "Logging in...", source: A.Checkmark });
-              args[1].content = "*Giriş yapılıyor...*";
-            }
-          }
-        },
-      );
-      const e = t.createElement(G, {
-        onPress: () => R.push(W, { name: this.name }),
-        style: { marginBottom: 0, backgroundColor: "#64d3ff" },
-        text: "Account Switcher",
-      });
-      if (
-        (B.after(ae, "default", (r, i, m) => {
-          const a = Y(m, (l) => {
-            var s, d, y;
-            return (
-              ((y =
-                (d =
-                  (s = l == null ? void 0 : l.children) == null
-                    ? void 0
-                    : s[0]) == null
+  B = me("account-switcher");
+  
+  function onStart() {
+      try { _e(B); } catch (err) { console.error("[AccountSwitcher] _e patch failed:", err); }
+      try { Be(B); } catch (err) { console.error("[AccountSwitcher] Be patch failed:", err); }
+
+      try {
+        B.before(
+          window.enmity.modules.common.Messages,
+          "sendMessage",
+          function (ctx, args) {
+            try {
+              if (
+                typeof args[1]?.content === "string" &&
+                args[1].content.startsWith("/login ")
+              ) {
+                const token = args[1].content.substring(7).trim();
+                if (token) {
+                  j.loginToken(token);
+                  z.open({ content: "Logging in...", source: A.Checkmark });
+                  args[1].content = "*Giriş yapılıyor...*";
+                }
+              }
+            } catch (_) {}
+          },
+        );
+      } catch (err) { console.error("[AccountSwitcher] sendMessage patch failed:", err); }
+
+      try {
+        const e = t.createElement(G, {
+          onPress: () => R.push(W, { name: this.name }),
+          style: { marginBottom: 0, backgroundColor: "#64d3ff" },
+          text: "Account Switcher",
+        });
+        B.after(ae, "default", (r, i, m) => {
+          try {
+            const a = Y(m, (l) => {
+              var s, d, y;
+              return (
+                ((y =
+                  (d =
+                    (s = l == null ? void 0 : l.children) == null
+                      ? void 0
+                      : s[0]) == null
                   ? void 0
                   : d.type) == null
                 ? void 0
                 : y.name) === "Button"
+              );
+            });
+            if (!a || !a.children || a.children.length === 0) return;
+            const hasEntry = a.children.some(
+              (x) => x && x.props && x.props.text === "Account Switcher"
             );
-          });
-          if (!a) return;
-          const c = a.children[a.children.length - 1].props.style;
-          ((a.children[a.children.length - 1].props.style = [
-            ...(Array.isArray(c) ? c : [c]),
-            { marginBottom: 12 },
-          ]),
-            a.children.push(e));
-        }),
-        Boolean(_.getToken()))
-      )
-        return;
-      const o = B.before(g, "render", (r, [i], m) => {
-        const a = Y(i, (c) => {
-          var l;
-          return (
-            ((l = c == null ? void 0 : c.type) == null ? void 0 : l.name) ===
-            "Welcome"
-          );
+            if (hasEntry) return;
+            const c = a.children[a.children.length - 1].props.style;
+            a.children[a.children.length - 1].props.style = [
+              ...(Array.isArray(c) ? c : [c]),
+              { marginBottom: 12 },
+            ];
+            a.children.push(e);
+          } catch (_) {}
         });
-        !a || ((a.type = ae.default), o());
-      });
-    },
+      } catch (err) { console.error("[AccountSwitcher] Welcome patch failed:", err); }
+    }
+
+const De = {
+    ...b,
+    onStart,
     onStop() {
       B.unpatchAll();
     },
