@@ -642,13 +642,7 @@ function ie({
   );
 }
 function ce({ settings: e, navigation: o = I.useNavigation() }) {
-  t.useEffect(() => {
-    setTimeout(() => {
-      R.push(W, { name: b.name });
-    }, 100);
-  }, []);
-  
-  return t.createElement(g, null);
+  return t.createElement(W, { name: b.name, mainScreen: Me });
 }
 function W({
   name: e = "pluginName",
