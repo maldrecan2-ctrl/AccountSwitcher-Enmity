@@ -642,11 +642,17 @@ function ie({
   );
 }
 function ce({ settings: e, navigation: o = I.useNavigation() }) {
-  return t.createElement(Me, { settings: e, navigation: o });
+  t.useEffect(() => {
+    setTimeout(() => {
+      R.push(W, { name: b.name });
+    }, 100);
+  }, []);
+  
+  return t.createElement(g, null);
 }
 function W({
   name: e = "pluginName",
-  mainScreen: o = ce,
+  mainScreen: o = Me,
   addAccount: r = ie,
 } = {}) {
   const i = L({
