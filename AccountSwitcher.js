@@ -747,10 +747,12 @@ function xe(e) {
   const SettingsListModule = I(["SearchableSettingsList"]);
 
   if (ConstantsModule && ConstantsModule.SETTING_RENDERER_CONFIG && SettingsListModule && SettingsListModule.SearchableSettingsList) {
+    const iconId = window.enmity.modules.common.Assets ? window.enmity.modules.common.Assets.getIDByName("MyAccount") : null;
+
     ConstantsModule.SETTING_RENDERER_CONFIG["AccountSwitcherMain"] = {
       type: "route",
       title: "Account Switcher",
-      icon: A.MyAccount,
+      icon: iconId || { uri: "https://enmity-mod.github.io/assets/icon-64.png" },
       parent: null,
       screen: {
         route: "AccountSwitcherMain",
@@ -761,19 +763,30 @@ function xe(e) {
     e.before(SettingsListModule.SearchableSettingsList, "type", (ctx, args) => {
       if (args && args[0] && args[0].sections) {
         const sections = args[0].sections;
-        const accountSection = sections.find(sec => sec.settings && sec.settings.includes("ACCOUNT"));
-        if (accountSection) {
-          if (!accountSection.settings.includes("AccountSwitcherMain")) {
-            const accountItemIdx = accountSection.settings.indexOf("ACCOUNT");
-            accountSection.settings.splice(accountItemIdx + 1, 0, "AccountSwitcherMain");
+        let inserted = false;
+        
+        for (let i = 0; i < sections.length; i++) {
+          if (sections[i].settings && sections[i].settings.includes("ACCOUNT")) {
+            const accountItemIdx = sections[i].settings.indexOf("ACCOUNT");
+            if (!sections[i].settings.includes("AccountSwitcherMain")) {
+              sections[i].settings.splice(accountItemIdx + 1, 0, "AccountSwitcherMain");
+            }
+            inserted = true;
+            break;
           }
-        } else {
+        }
+
+        if (!inserted) {
           const hasCustom = sections.find(sec => sec.label === "PLUGINS");
           if (!hasCustom) {
             sections.push({
               label: "PLUGINS",
               settings: ["AccountSwitcherMain"]
             });
+          } else {
+            if (!hasCustom.settings.includes("AccountSwitcherMain")) {
+              hasCustom.settings.push("AccountSwitcherMain");
+            }
           }
         }
       }
