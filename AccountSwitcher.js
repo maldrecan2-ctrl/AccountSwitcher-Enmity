@@ -757,29 +757,81 @@ function xe(e) {
         ({ props: { navigation: l } }, s, d) => {
           const { children: y } = d.props;
           if (!Array.isArray(y)) return;
-          for (let i = 0; i < y.length; i++) {
-            const section = y[i];
-            if (section && section.props && Array.isArray(section.props.children)) {
-              const hasThemes = section.props.children.some(
-                (child) => child && child.props && child.props.label === "Themes"
-              );
-              if (hasThemes) {
-                const hasAccountSwitcher = section.props.children.some(
-                  (child) => child && child.props && child.props.label === "Account Switcher"
+
+          const injectAccountSwitcher = (childrenArray) => {
+            for (let i = 0; i < childrenArray.length; i++) {
+              const child = childrenArray[i];
+              if (!child) continue;
+
+              if (child.props && child.props.label === "Themes") {
+                const hasAS = childrenArray.some(
+                  (c) => c && c.props && c.props.label === "Account Switcher"
                 );
-                if (!hasAccountSwitcher) {
-                  section.props.children.push(
+                if (!hasAS) {
+                  childrenArray.splice(
+                    i + 1,
+                    0,
                     t.createElement(p, {
                       label: "Account Switcher",
                       leading: t.createElement(p.Icon, { source: A.MyAccount }),
                       trailing: p.Arrow,
-                      onPress: () => {
-                        l.navigate("AccountSwitcherMain");
-                      },
+                      onPress: () => l.navigate("AccountSwitcherMain"),
                     })
                   );
                 }
-                break;
+                return true;
+              }
+
+              if (Array.isArray(child)) {
+                if (injectAccountSwitcher(child)) return true;
+              }
+
+              if (child.props && child.props.children) {
+                const grandChildren = child.props.children;
+                if (Array.isArray(grandChildren)) {
+                  if (injectAccountSwitcher(grandChildren)) return true;
+                } else if (typeof grandChildren === "object") {
+                  if (
+                    grandChildren.props &&
+                    grandChildren.props.label === "Themes"
+                  ) {
+                    child.props.children = [
+                      grandChildren,
+                      t.createElement(p, {
+                        label: "Account Switcher",
+                        leading: t.createElement(p.Icon, { source: A.MyAccount }),
+                        trailing: p.Arrow,
+                        onPress: () => l.navigate("AccountSwitcherMain"),
+                      }),
+                    ];
+                    return true;
+                  }
+                }
+              }
+            }
+            return false;
+          };
+
+          const injected = injectAccountSwitcher(y);
+          if (!injected) {
+            const h = y.findIndex(
+              (E) => T.Messages.LOGOUT === (E == null ? void 0 : E.props.label)
+            );
+            if (h !== -1) {
+              const hasAS = y.some(
+                (c) => c && c.props && c.props.label === "Account Switcher"
+              );
+              if (!hasAS) {
+                y.splice(
+                  h,
+                  0,
+                  t.createElement(p, {
+                    label: "Account Switcher",
+                    leading: t.createElement(p.Icon, { source: A.MyAccount }),
+                    trailing: p.Arrow,
+                    onPress: () => l.navigate("AccountSwitcherMain"),
+                  })
+                );
               }
             }
           }
