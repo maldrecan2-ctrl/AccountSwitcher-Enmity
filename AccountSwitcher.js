@@ -747,12 +747,10 @@ function xe(e) {
   const SettingsListModule = I(["SearchableSettingsList"]);
 
   if (ConstantsModule && ConstantsModule.SETTING_RENDERER_CONFIG && SettingsListModule && SettingsListModule.SearchableSettingsList) {
-    const iconId = window.enmity.modules.common.Assets ? window.enmity.modules.common.Assets.getIDByName("MyAccount") : null;
-
     ConstantsModule.SETTING_RENDERER_CONFIG["AccountSwitcherMain"] = {
       type: "route",
       title: "Account Switcher",
-      icon: iconId || { uri: "https://enmity-mod.github.io/assets/icon-64.png" },
+      icon: null,
       parent: null,
       screen: {
         route: "AccountSwitcherMain",
