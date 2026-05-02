@@ -755,53 +755,67 @@ function xe(e) {
         c.type.prototype,
         "render",
         ({ props: { navigation: l } }, s, d) => {
-          let sections = null;
+          let pluginsRowParent = null;
+          let pluginsRowIdx = -1;
 
-          let targetNode = Y(d, (node) => {
+          Y(d, (node) => {
             const children = node && (node.children || (node.props && node.props.children));
-            return Array.isArray(children) && children.some((c) => c && c.props && c.props.title === T.Messages.SUPPORT);
+            if (Array.isArray(children)) {
+              const idx = children.findIndex((c) => c && c.props && c.props.label === "Plugins");
+              if (idx !== -1) {
+                pluginsRowParent = children;
+                pluginsRowIdx = idx;
+                return true;
+              }
+            }
+            return false;
           });
 
-          if (targetNode) {
-            sections = targetNode.children || targetNode.props.children;
-          } else {
-            targetNode = Y(d, (node) => {
-              const children = node && (node.children || (node.props && node.props.children));
-              return Array.isArray(children) && children.some((c) => c && c.props && c.props.label === T.Messages.LOGOUT);
-            });
-            if (targetNode) {
-              sections = targetNode.children || targetNode.props.children;
+          if (pluginsRowParent && pluginsRowIdx !== -1) {
+            const hasAS = pluginsRowParent.some((c) => c && c.props && c.props.label === "Account Switcher");
+            if (!hasAS) {
+              pluginsRowParent.splice(
+                pluginsRowIdx + 1,
+                0,
+                t.createElement(n.FormDivider, null),
+                t.createElement(p, {
+                  label: "Account Switcher",
+                  leading: t.createElement(p.Icon, { source: A.MyAccount }),
+                  trailing: p.Arrow,
+                  onPress: () => l.navigate("AccountSwitcherMain"),
+                })
+              );
             }
-          }
+          } else {
+            let logoutParent = null;
+            let logoutIdx = -1;
 
-          if (sections && Array.isArray(sections)) {
-            const hasAccountSwitcher = Y(sections, (node) => node && node.props && node.props.label === "Account Switcher");
-            if (!hasAccountSwitcher) {
-              const customPluginsSection = t.createElement(
-                t.Fragment,
-                null,
-                t.createElement(
-                  n.FormSection,
-                  { key: "CustomPlugins", title: "PLUGINS" },
+            Y(d, (node) => {
+              const children = node && (node.children || (node.props && node.props.children));
+              if (Array.isArray(children)) {
+                const idx = children.findIndex((c) => c && c.props && c.props.label === T.Messages.LOGOUT);
+                if (idx !== -1) {
+                  logoutParent = children;
+                  logoutIdx = idx;
+                  return true;
+                }
+              }
+              return false;
+            });
+
+            if (logoutParent && logoutIdx !== -1) {
+              const hasAS = logoutParent.some((c) => c && c.props && c.props.label === "Account Switcher");
+              if (!hasAS) {
+                logoutParent.splice(
+                  logoutIdx,
+                  0,
                   t.createElement(p, {
                     label: "Account Switcher",
                     leading: t.createElement(p.Icon, { source: A.MyAccount }),
                     trailing: p.Arrow,
                     onPress: () => l.navigate("AccountSwitcherMain"),
                   })
-                )
-              );
-
-              const supportIdx = sections.findIndex((sec) => sec && sec.props && sec.props.title === T.Messages.SUPPORT);
-              if (supportIdx !== -1) {
-                sections.splice(supportIdx, 0, customPluginsSection);
-              } else {
-                const logoutIdx = sections.findIndex((sec) => Y(sec, (node) => node && node.props && node.props.label === T.Messages.LOGOUT));
-                if (logoutIdx !== -1) {
-                  sections.splice(logoutIdx, 0, customPluginsSection);
-                } else {
-                  sections.push(customPluginsSection);
-                }
+                );
               }
             }
           }
