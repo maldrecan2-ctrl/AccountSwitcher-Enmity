@@ -458,34 +458,6 @@ var Me = ({ settings: e, navigation: o }) => {
 const N = X.createStackNavigator(),
     { createThemedStyleSheet: L } = D,
     { ThemeColorMap: v } = H;
-function oe({ navigation: e = I.useNavigation() }) {
-    const o = L({
-        header: {
-            tintColor: v.HEADER_PRIMARY,
-            width: 24,
-            height: 24,
-        },
-        wrapper: {
-            marginRight: 15,
-            width: 32,
-            height: 32,
-            backgroundColor: "#4E5058",
-            borderRadius: 6,
-            justifyContent: "center",
-            alignItems: "center"
-        },
-    });
-    return t.createElement(
-        P,
-        {
-            style: o.wrapper,
-            onPress: () => {
-                // e.navigate("AccountSwitcherSettings"); // Placeholder if settings exist
-            },
-        },
-        t.createElement($, { style: o.header, source: A.Settings })
-    );
-}
 function re({
     settings: e,
     navigation: o = I.useNavigation(),
@@ -694,7 +666,6 @@ function W({
                         title: "Close",
                         onPress: () => R.pop(),
                     }),
-                headerRight: () => t.createElement(oe, { navigation: m }),
                 ...X.TransitionPresets.ModalSlideFromBottomIOS,
             }),
         }),
@@ -728,7 +699,6 @@ function Pe(e) {
             key: "AccountSwitcherMain",
             title: "Account Switcher",
             render: k(ce, b.name),
-            headerRight: oe,
         },
         AccountSwitcherAddAccount: {
             key: "AccountSwitcherAddAccount",
@@ -867,7 +837,7 @@ const ae = U("Welcome", { default: !1 }),
                 },
             );
             const e = t.createElement(G, {
-                onPress: () => R.push(W, { name: this.name }),
+                onPress: () => R.push(W, { name: b.name }),
                 style: { marginBottom: 0, backgroundColor: "#64d3ff" },
                 text: "Account Switcher",
             });
@@ -911,13 +881,6 @@ const ae = U("Welcome", { default: !1 }),
         },
         onStop() {
             B.unpatchAll();
-        },
-        getSettingsPanel({ settings: e }) {
-            return t.createElement(g, {
-                onLayout: () => {
-                    (R.pop(), R.push(W, { name: b.name }));
-                },
-            });
         },
     };
 le(De);
