@@ -755,19 +755,33 @@ function xe(e) {
         c.type.prototype,
         "render",
         ({ props: { navigation: l } }, s, d) => {
-          const { children: y } = d.props,
-            h = y.findIndex(
-              (E) => T.Messages.LOGOUT === (E == null ? void 0 : E.props.label),
-            );
-          if (h !== -1) {
-            y.splice(h, 0, t.createElement(p, {
-              label: "Account Switcher",
-              leading: t.createElement(p.Icon, { source: A.MyAccount }),
-              trailing: p.Arrow,
-              onPress: () => {
-                l.navigate("AccountSwitcherMain");
+          const { children: y } = d.props;
+          if (!Array.isArray(y)) return;
+          for (let i = 0; i < y.length; i++) {
+            const section = y[i];
+            if (section && section.props && Array.isArray(section.props.children)) {
+              const hasThemes = section.props.children.some(
+                (child) => child && child.props && child.props.label === "Themes"
+              );
+              if (hasThemes) {
+                const hasAccountSwitcher = section.props.children.some(
+                  (child) => child && child.props && child.props.label === "Account Switcher"
+                );
+                if (!hasAccountSwitcher) {
+                  section.props.children.push(
+                    t.createElement(p, {
+                      label: "Account Switcher",
+                      leading: t.createElement(p.Icon, { source: A.MyAccount }),
+                      trailing: p.Arrow,
+                      onPress: () => {
+                        l.navigate("AccountSwitcherMain");
+                      },
+                    })
+                  );
+                }
+                break;
               }
-            }));
+            }
           }
         },
       ),
