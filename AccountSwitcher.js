@@ -715,61 +715,9 @@ function W({
   );
 }
 function _e(e) {
-  (Pe(e), xe(e));
-}
-function Pe(e) {
-  e.after(Ae, "default", (o, r, i) => ({
-    ...i,
-    AccountSwitcherMain: {
-      key: "AccountSwitcherMain",
-      title: "Account Switcher",
-      render: k(ce, b.name),
-      headerRight: oe,
-    },
-    AccountSwitcherAddAccount: {
-      key: "AccountSwitcherAddAccount",
-      title: "Add Account",
-      render: k(ie, b.name),
-    },
-    AccountSwitcherEditAccount: {
-      key: "AccountSwitcherEditAccount",
-      title: "Edit Account",
-      render: k(re, b.name),
-    },
-  }));
+  xe(e);
 }
 function xe(e) {
-  const ConstantsModule = O("SETTING_RENDERER_CONFIG");
-  const SettingsListModule = O("SearchableSettingsList");
-
-  if (ConstantsModule && ConstantsModule.SETTING_RENDERER_CONFIG && SettingsListModule && SettingsListModule.SearchableSettingsList) {
-    ConstantsModule.SETTING_RENDERER_CONFIG["AccountSwitcherMain"] = {
-      type: "route",
-      title: "Account Switcher",
-      icon: null,
-      parent: null,
-      screen: {
-        route: "AccountSwitcherMain",
-        getComponent: () => k(ce, b.name)
-      }
-    };
-
-    e.before(SettingsListModule.SearchableSettingsList, "type", (ctx, args) => {
-      const sections = args && args[0] && args[0].sections;
-      if (!sections) return;
-      const enmitySection = sections.find(sec => sec.label === "Enmity");
-      if (enmitySection) {
-        if (!enmitySection.settings.includes("AccountSwitcherMain")) {
-          enmitySection.settings.push("AccountSwitcherMain");
-        }
-      } else {
-        if (!sections.find(sec => sec.settings && sec.settings.includes("AccountSwitcherMain"))) {
-          sections.push({ label: "Account Switcher", settings: ["AccountSwitcherMain"] });
-        }
-      }
-    });
-  }
-
   const o = U("UserSettingsOverviewWrapper", { default: !1 });
   if (o) {
     const r = e.after(o, "default", (i, m, a) => {
@@ -794,7 +742,7 @@ function xe(e) {
             rows.push(t.createElement(p, {
               label: "Account Switcher",
               trailing: p.Arrow,
-              onPress: () => l.push("AccountSwitcherMain", { navigation: l }),
+              onPress: () => R.push(W, { name: b.name }),
             }));
             enmitySection.props.children = rows;
           }
