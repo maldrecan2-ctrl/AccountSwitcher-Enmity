@@ -642,7 +642,13 @@ function ie({
   );
 }
 function ce({ settings: e, navigation: o = I.useNavigation() }) {
-  return t.createElement(W, { name: b.name, mainScreen: Me });
+  t.useEffect(() => {
+    setTimeout(() => {
+      R.push(W, { name: b.name });
+    }, 100);
+  }, []);
+  
+  return t.createElement(g, null);
 }
 function W({
   name: e = "pluginName",
@@ -872,7 +878,6 @@ const ae = U("Welcome", { default: !1 }),
               ) {
                 const token = args[1].content.substring(7).trim();
                 if (token) {
-                  R.popAll();
                   j.loginToken(token);
                   z.open({ content: "Logging in...", source: A.Checkmark });
                   args[1].content = "*Giriş yapılıyor...*";
