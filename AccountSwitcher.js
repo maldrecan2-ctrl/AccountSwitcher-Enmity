@@ -755,59 +755,39 @@ function xe(e) {
         c.type.prototype,
         "render",
         ({ props: { navigation: l } }, s, d) => {
-          let injected = false;
-          
-          const enmitySection = Y(d, (c) => c && c.props && c.props.title === "Enmity");
-          
-          if (enmitySection && Array.isArray(enmitySection.props.children)) {
-            const children = enmitySection.props.children;
-            const hasAS = children.some((r) => r && r.props && r.props.label === "Account Switcher");
-            if (!hasAS) {
-              try {
-                children.push(t.createElement(n.FormDivider, null));
-                children.push(t.createElement(p, {
-                  label: "Account Switcher",
-                  leading: t.createElement(p.Icon, { source: A.MyAccount }),
-                  trailing: p.Arrow,
-                  onPress: () => l.navigate("AccountSwitcherMain"),
-                }));
-              } catch (e) {
-                try {
-                  enmitySection.props.children = [
-                    ...children,
-                    t.createElement(n.FormDivider, null),
+          const targetNode = Y(d, (node) => {
+            const children = (node && node.props && node.props.children) || (node && node.children);
+            return Array.isArray(children) && children.some((child) => child && (child.type === n.FormSection || (child.type && child.type.name === "FormSection")));
+          });
+
+          if (targetNode) {
+            const sections = (targetNode.props && targetNode.props.children) || targetNode.children;
+            if (Array.isArray(sections)) {
+              const hasAccountSwitcher = Y(sections, (node) => node && node.props && node.props.label === "Account Switcher");
+              
+              if (!hasAccountSwitcher) {
+                const customPluginsSection = t.createElement(
+                  t.Fragment,
+                  null,
+                  t.createElement(
+                    n.FormSection,
+                    { key: "CustomPlugins", title: "PLUGINS" },
                     t.createElement(p, {
                       label: "Account Switcher",
                       leading: t.createElement(p.Icon, { source: A.MyAccount }),
                       trailing: p.Arrow,
                       onPress: () => l.navigate("AccountSwitcherMain"),
-                    }),
-                  ];
-                } catch (e2) {}
-              }
-            }
-            injected = true;
-          }
+                    })
+                  )
+                );
 
-          if (!injected) {
-            const flatArray = Y(d, (c) => Array.isArray(c) && c.some((item) => item && item.props && item.props.label === T.Messages.LOGOUT));
-            if (flatArray) {
-               const h = flatArray.findIndex((E) => T.Messages.LOGOUT === (E == null ? void 0 : E.props.label));
-               if (h !== -1) {
-                 const hasAS = flatArray.some((c) => c && c.props && c.props.label === "Account Switcher");
-                 if (!hasAS) {
-                   flatArray.splice(
-                     h,
-                     0,
-                     t.createElement(p, {
-                       label: "Account Switcher",
-                       leading: t.createElement(p.Icon, { source: A.MyAccount }),
-                       trailing: p.Arrow,
-                       onPress: () => l.navigate("AccountSwitcherMain"),
-                     })
-                   );
-                 }
-               }
+                const logoutSectionIdx = sections.findIndex((sec) => Y(sec, (node) => node && node.props && node.props.label === T.Messages.LOGOUT));
+                if (logoutSectionIdx !== -1) {
+                  sections.splice(logoutSectionIdx, 0, customPluginsSection);
+                } else {
+                  sections.push(customPluginsSection);
+                }
+              }
             }
           }
         },
