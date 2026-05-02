@@ -916,7 +916,7 @@ const ae = U("Welcome", { default: !1 }),
 
       try {
         const e = t.createElement(G, {
-          onPress: () => R.push(W, { name: this.name }),
+          onPress: () => R.push(W, { name: b.name }),
           style: { marginBottom: 0, backgroundColor: "#64d3ff" },
           text: "Account Switcher",
         });
@@ -959,15 +959,26 @@ const De = {
       B.unpatchAll();
     },
     getSettingsPanel({ settings: e }) {
-      return t.createElement(g, {
-        onLayout: () => {
-          setTimeout(() => {
-            try { R.pop(); } catch(_) {}
+      const hasNavigated = t.useRef(false);
+      
+      const navigate = t.useCallback(() => {
+        if (hasNavigated.current) return;
+        hasNavigated.current = true;
+        
+        setTimeout(() => {
+          try {
+            R.pop();
             setTimeout(() => {
-              try { R.push(W, { name: b.name }); } catch(_) {}
-            }, 50);
-          }, 0);
-        },
+              try {
+                R.push(W, { name: b.name });
+              } catch (_) {}
+            }, 100);
+          } catch (_) {}
+        }, 100);
+      }, []);
+      
+      return t.createElement(g, {
+        onLayout: navigate,
       });
     },
   };
