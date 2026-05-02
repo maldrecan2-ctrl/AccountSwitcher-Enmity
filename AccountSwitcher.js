@@ -759,10 +759,7 @@ function xe(e) {
 
           let targetNode = Y(d, (node) => {
             const children = node && (node.children || (node.props && node.props.children));
-            return Array.isArray(children) && children.some((c) => c && (
-              (c.props && c.props.title === "Enmity") ||
-              (c.props && c.props.children && c.props.children.props && c.props.children.props.title === "Enmity")
-            ));
+            return Array.isArray(children) && children.some((c) => c && c.props && c.props.title === T.Messages.SUPPORT);
           });
 
           if (targetNode) {
@@ -795,11 +792,16 @@ function xe(e) {
                 )
               );
 
-              const logoutIdx = sections.findIndex((sec) => Y(sec, (node) => node && node.props && node.props.label === T.Messages.LOGOUT));
-              if (logoutIdx !== -1) {
-                sections.splice(logoutIdx, 0, customPluginsSection);
+              const supportIdx = sections.findIndex((sec) => sec && sec.props && sec.props.title === T.Messages.SUPPORT);
+              if (supportIdx !== -1) {
+                sections.splice(supportIdx, 0, customPluginsSection);
               } else {
-                sections.push(customPluginsSection);
+                const logoutIdx = sections.findIndex((sec) => Y(sec, (node) => node && node.props && node.props.label === T.Messages.LOGOUT));
+                if (logoutIdx !== -1) {
+                  sections.splice(logoutIdx, 0, customPluginsSection);
+                } else {
+                  sections.push(customPluginsSection);
+                }
               }
             }
           }
